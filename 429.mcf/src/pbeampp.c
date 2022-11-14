@@ -28,8 +28,6 @@ Copyright (c) 2003-2005 Andreas Loebel.
 #include "pbeampp.h"
 
 
-
-
 #ifdef _PROTO_
 int bea_is_dual_infeasible( arc_t *arc, cost_t red_cost )
 #else
@@ -153,47 +151,43 @@ arc_t *primal_bea_mpp( m, arcs, stop_arcs, red_cost_of_bea )
                 perm[next]->cost = red_cost;
                 perm[next]->abs_cost = ABS(red_cost);
             }
-                }   
+        }   
         basket_size = next;
-        }
+    }
 
     old_group_pos = group_pos;
 
-NEXT:
-    /* price next group */
-    arc = arcs + group_pos;
-    for( ; arc < stop_arcs; arc += nr_group )
-    {
-        if( arc->ident > BASIC )
-        {
-            /* red_cost = bea_compute_red_cost( arc ); */
-            red_cost = arc->cost - arc->tail->potential + arc->head->potential;
-            if( bea_is_dual_infeasible( arc, red_cost ) )
+    do {
+        /* price next group */
+        arc = arcs + group_pos;
+        for( ; arc < stop_arcs; arc += nr_group )
+        {   
+            if( arc->ident > BASIC )
             {
-                basket_size++;
-                perm[basket_size]->a = arc;
-                perm[basket_size]->cost = red_cost;
-                perm[basket_size]->abs_cost = ABS(red_cost);
+                /* red_cost = bea_compute_red_cost( arc ); */
+                red_cost = arc->cost - arc->tail->potential + arc->head->potential;
+                if( bea_is_dual_infeasible( arc, red_cost ) )
+                {
+                    basket_size++;
+                    perm[basket_size]->a = arc;
+                    perm[basket_size]->cost = red_cost;
+                    perm[basket_size]->abs_cost = ABS(red_cost);
+                }
             }
         }
-        
-    }
 
-    if( ++group_pos == nr_group )
-        group_pos = 0;
+        if( ++group_pos == nr_group )
+            group_pos = 0;
+    } while ( basket_size < B && group_pos != old_group_pos );
 
-    if( basket_size < B && group_pos != old_group_pos )
-        goto NEXT;
-
+    
     if( basket_size == 0 )
     {
         initialize = 1;
         *red_cost_of_bea = 0; 
         return NULL;
     }
-    
     sort_basket( 1, basket_size );
-    
     *red_cost_of_bea = perm[1]->cost;
     return( perm[1]->a );
 }

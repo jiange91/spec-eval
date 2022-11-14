@@ -320,7 +320,10 @@ long dual_feasible(  net )
                 printf("%d %d %d %ld\n", arc->tail->number, arc->head->number,
                        arc->ident, red_cost );
 #else
-                goto DUAL_INFEAS;
+                // goto DUAL_INFEAS;
+                fprintf( stderr, "DUAL NETWORK SIMPLEX: " );
+                fprintf( stderr, "basis dual infeasible\n" );
+                return 1;
 #endif
             
             break;
@@ -331,7 +334,10 @@ long dual_feasible(  net )
                 printf("%d %d %d %ld\n", arc->tail->number, arc->head->number,
                        arc->ident, red_cost );
 #else
-                goto DUAL_INFEAS;
+                // goto DUAL_INFEAS;
+                fprintf( stderr, "DUAL NETWORK SIMPLEX: " );
+                fprintf( stderr, "basis dual infeasible\n" );
+                return 1;
 #endif
 
             break;
@@ -341,7 +347,10 @@ long dual_feasible(  net )
                 printf("%d %d %d %ld\n", arc->tail->number, arc->head->number,
                        arc->ident, red_cost );
 #else
-                goto DUAL_INFEAS;
+                // goto DUAL_INFEAS;
+                fprintf( stderr, "DUAL NETWORK SIMPLEX: " );
+                fprintf( stderr, "basis dual infeasible\n" );
+                return 1;
 #endif
 
             break;

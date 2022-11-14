@@ -24,8 +24,6 @@ Copyright (c) 2003-2005 Andreas Loebel.
 
 #include "psimplex.h"
 
-
-
 #ifdef _PROTO_
 long primal_net_simplex( network_t *net )
 #else
@@ -55,9 +53,9 @@ long primal_net_simplex(  net )
     long          *bound_exchanges = &(net->bound_exchanges);
     long          *checksum = &(net->checksum);
 
-
     while( !opt )
-    {       
+    {   //9365
+        //7495
         if( (bea = primal_bea_mpp( m, arcs, stop_arcs, &red_cost_of_bea )) )
         {
             (*iterations)++;
@@ -82,7 +80,6 @@ long primal_net_simplex(  net )
             delta = (flow_t)1;
             iminus = primal_iminus( &delta, &xchange, iplus, 
                     jplus, &w );
-
             if( !iminus )
             {
                 (*bound_exchanges)++;
@@ -103,7 +100,6 @@ long primal_net_simplex(  net )
                     jplus = iplus;
                     iplus = temp;
                 }
-
                 jminus = iminus->pred;
 
                 bla = iminus->basic_arc;
@@ -122,12 +118,10 @@ long primal_net_simplex(  net )
                     new_orientation = UP;
                 else
                     new_orientation = DOWN;
-
                 update_tree( !xchange, new_orientation,
                             delta, new_flow, iplus, jplus, iminus, 
                             jminus, w, bea, red_cost_of_bea,
-                            (flow_t)net->feas_tol );
-
+                            (flow_t)net->feas_tol);
                 bea->ident = BASIC; 
                 bla->ident = new_set;
                

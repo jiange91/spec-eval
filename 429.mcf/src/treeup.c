@@ -23,8 +23,6 @@ Copyright (c) 2003-2005 Andreas Loebel.
 #include "treeup.h"
 
 
-
-
 #ifdef _PROTO_
 void update_tree( 
                  long cycle_ori,
@@ -76,26 +74,37 @@ void update_tree( cycle_ori, new_orientation, delta, new_flow,
     
     father = iminus;
     father->potential += sigma;
- RECURSION:
-    temp = father->child;
-    if( temp )
+
+    do 
     {
-    ITERATION:
+        temp = father->child;
+        if (temp)
+        {
+            temp->potential += sigma;
+            father = temp;
+        }
+    } while (temp);
+
+    while (father != iminus) 
+    {
+        temp = father->sibling;
+        if (!temp)
+        {
+            father = father->pred;
+            continue;
+        }
         temp->potential += sigma;
         father = temp;
-        goto RECURSION;
+        do 
+        {
+            temp = father->child;
+            if (temp)
+            {
+                temp->potential += sigma;
+                father = temp;
+            }
+        } while (temp);
     }
- TEST:
-    if( father == iminus )
-        goto CONTINUE;
-    temp = father->sibling;
-    if( temp )
-        goto ITERATION;
-    father = father->pred;
-    goto TEST;
-    
- CONTINUE:
-    /**/
 
 
     temp = iplus;

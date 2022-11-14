@@ -112,7 +112,6 @@ long read_min( net )
 
     node = net->nodes;
     arc = net->arcs;
-
     for( i = 1; i <= net->n_trips; i++ )
     {
         fgets( instring, 200, in );

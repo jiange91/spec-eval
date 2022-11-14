@@ -34,5 +34,4 @@ Copyright (c) 2003-2005 Andreas Loebel.
 #include "implicit.h"
 #include "limits.h"
 
-
 #endif
