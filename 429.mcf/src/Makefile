@@ -1,10 +1,10 @@
 # Include standard template for this suite
 CC=clang
-CFLAGS += -O3 -g
 LIBS = -ltcmalloc
 cgeist = /users/Zijian/Disagg-mlir/build/bin/cgeist
 clang-b = /users/Zijian/Disagg-mlir/llvm-project/build/bin/clang
 USE_MLIR = 0
+CFLAGS += -O0 -g -Wall
 
 obj_dir = obj
 _obj = implicit.o mcf.o mcfutil.o output.o pbeampp.o pbla.o pflowup.o psimplex.o pstart.o readmin.o treeup.o
