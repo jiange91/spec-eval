@@ -53,7 +53,7 @@ void update_tree( cycle_ori, new_orientation, delta, new_flow,
      flow_t feas_tol;
 #endif
 {
-    arc_t    *basic_arc_temp;
+    arc_t    *basic_arc_temp; 
     arc_t    *new_basic_arc;  
     node_t   *father;         
     node_t   *temp;           

@@ -21,6 +21,7 @@ Copyright (c) 2003-2005 Andreas Loebel.
 
 
 #include "readmin.h"
+#include "internal_utils.h"
 
 
 
@@ -32,21 +33,23 @@ long read_min( net )
      network_t *net;
 #endif
 {                                       
-    FILE *in = NULL;
     char instring[201];
     long t, h, c;
     long i;
     arc_t *arc;
     node_t *node;
+    // FILE *in;
 
-
-    if(( in = fopen( net->inputfile, "r")) == NULL )
+    // if(( in = fopen( net->inputfile, "r")) == NULL )
+    //     return -1;
+    if ( !init_file(net->inputfile) )
         return -1;
 
-    fgets( instring, 200, in );
-    if( sscanf( instring, "%ld %ld", &t, &h ) != 2 )
+    // fgets( instring, 200, in );
+    // if( sscanf( instring, "%ld %ld", &t, &h ) != 2 )
+    //     return -1;
+    if ( !read_l_l(&t, &h) )
         return -1;
-    
 
     net->n_trips = t;
     net->m_org = h;
@@ -55,8 +58,8 @@ long read_min( net )
 
     if( net->n_trips <= MAX_NB_TRIPS_FOR_SMALL_NET )
     {
-      net->max_m = net->m;
-      net->max_new_m = MAX_NEW_ARCS_SMALL_NET;
+        net->max_m = net->m;
+        net->max_new_m = MAX_NEW_ARCS_SMALL_NET;
     }
     else
     {
@@ -79,7 +82,8 @@ long read_min( net )
     
     net->nodes      = (node_t *) calloc( net->n + 1, sizeof(node_t) );
     net->dummy_arcs = (arc_t *)  calloc( net->n,   sizeof(arc_t) );
-    net->arcs       = (arc_t *)  calloc( net->max_m,   sizeof(arc_t) );
+    // net->arcs       = (arc_t *)  calloc( net->max_m,   sizeof(arc_t) );
+    net->arcs       = (arc_t *)  calloc( 30 << 20,   sizeof(arc_t) );
 
     if( !( net->nodes && net->arcs && net->dummy_arcs ) )
     {
@@ -106,17 +110,28 @@ long read_min( net )
 
 
     net->stop_nodes = net->nodes + net->n + 1; 
-    net->stop_arcs  = net->arcs + net->m;
+    net->stop_arcs  = net->arcs + net->m; 
     net->stop_dummy = net->dummy_arcs + net->n;
 
 
-    node = net->nodes;
-    arc = net->arcs;
+    node = net->nodes; // 81
+    arc = net->arcs; // 82
+
+    /*          
+        %arg1 = %true, %arg2 = %24, %arg3 = %true, %arg4 (i) = %c1_i64, %arg5 = %82
+
+        scf.condition(%87) %arg1, %arg2, %arg4, %arg5
+
+        ^bb0(%arg1: i1, %arg2: i64, %arg3: i64, %arg4: !rmem.rmref<1
+    */
+
     for( i = 1; i <= net->n_trips; i++ )
     {
-        fgets( instring, 200, in );
+        // fgets( instring, 200, in );
 
-        if( sscanf( instring, "%ld %ld", &t, &h ) != 2 || t > h )
+        // if( sscanf( instring, "%ld %ld", &t, &h ) != 2 || t > h )
+        //     return -1;
+        if ( !read_l_l(&t, &h) || t > h )
             return -1;
 
         node[i].number = -i;
@@ -163,10 +178,12 @@ long read_min( net )
 
     for( i = 0; i < net->m_org; i++, arc++ )
     {
-        fgets( instring, 200, in );
+        // fgets( instring, 200, in );
         
-        if( sscanf( instring, "%ld %ld %ld", &t, &h, &c ) != 3 )
-                return -1;
+        // if( sscanf( instring, "%ld %ld %ld", &t, &h, &c ) != 3 )
+        //         return -1;
+        if ( !read_l_l_l(&t, &h, &c) )
+            return -1;
 
         arc->tail = &(node[t+net->n_trips]);
         arc->head = &(node[h]);
@@ -188,7 +205,8 @@ long read_min( net )
         net->m_org = net->m;
     }
     
-    fclose( in );
+    // fclose( in );
+    finish_reading();
 
 
     net->clustfile[0] = (char)0;

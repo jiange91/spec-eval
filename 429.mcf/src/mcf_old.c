@@ -28,26 +28,86 @@ extern long min_impl_duration;
 network_t net;
 
 
-// long cp_global_opt( void ) {
-//     long new_arcs;
-//     long residual_nb_it;
+#ifdef _PROTO_
+long global_opt( void )
+#else
+long global_opt( )
+#endif
+{
+    long new_arcs;
+    long residual_nb_it;
     
 
-//     new_arcs = -1;
-//     residual_nb_it = net.n_trips <= MAX_NB_TRIPS_FOR_SMALL_NET ?
-//         MAX_NB_ITERATIONS_SMALL_NET : MAX_NB_ITERATIONS_LARGE_NET;
-    
-// #ifdef REPORT
-//     printf( "active arcs                : %ld\n", net.m );
-// #endif
+    new_arcs = -1;
+    residual_nb_it = net.n_trips <= MAX_NB_TRIPS_FOR_SMALL_NET ?
+        MAX_NB_ITERATIONS_SMALL_NET : MAX_NB_ITERATIONS_LARGE_NET;
 
-//     primal_net_simplex( &net );
+    while( new_arcs )
+    {
+#ifdef REPORT
+        printf( "active arcs                : %ld\n", net.m );
+#endif
 
-// #ifdef REPORT
-//     printf( "simplex iterations         : %ld\n", net.iterations );
-//     printf( "objective value            : %0.0f\n", flow_cost(&net) );
-// #endif
-// }
+        primal_net_simplex( &net );
+
+
+#ifdef REPORT
+        printf( "simplex iterations         : %ld\n", net.iterations );
+        printf( "objective value            : %0.0f\n", flow_cost(&net) );
+#endif
+
+
+#if defined AT_HOME
+        printf( "%ld residual iterations\n", residual_nb_it );
+#endif
+
+        if( !residual_nb_it )
+            break;
+
+
+        if( net.m_impl )
+        {
+          new_arcs = suspend_impl( &net, (cost_t)-1, 0 );
+
+#ifdef REPORT
+          if( new_arcs )
+            printf( "erased arcs                : %ld\n", new_arcs );
+#endif
+        }
+
+
+        new_arcs = price_out_impl( &net );
+
+#ifdef REPORT
+        if( new_arcs )
+            printf( "new implicit arcs          : %ld\n", new_arcs );
+#endif
+        
+        if( new_arcs < 0 )
+        {
+#ifdef REPORT
+            printf( "not enough memory, exit(-1)\n" );
+#endif
+
+            exit(-1);
+        }
+
+#ifndef REPORT
+        printf( "\n" );
+#endif
+
+
+        residual_nb_it--;
+    }
+
+    printf( "checksum                   : %ld\n", net.checksum );
+
+    return 0;
+}
+
+
+
+
 
 
 #ifdef _PROTO_
@@ -89,8 +149,7 @@ int main( argc, argv )
 
 
     primal_start_artificial( &net );
-
-    // cp_global_opt();
+    global_opt( );
 
 
 #ifdef REPORT
@@ -99,13 +158,13 @@ int main( argc, argv )
 
     
 
-    // if( write_circulations( "mcf.out", &net ) )
-    // {
-    //     getfree( &net );
-    //     return -1;    
-    // }
+    if( write_circulations( "mcf.out", &net ) )
+    {
+        getfree( &net );
+        return -1;    
+    }
 
 
-    // getfree( &net );
+    getfree( &net );
     return 0;
 }
